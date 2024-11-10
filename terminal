@@ -1,0 +1,83 @@
+# 1. PostgreSQL 서비스 완전 중지
+brew services stop postgresql@14
+
+# 2. PostgreSQL 데이터 디렉토리 초기화
+rm -rf /usr/local/var/postgresql@14
+
+# 3. PostgreSQL 데이터베이스 초기화
+initdb /usr/local/var/postgresql@14 -E utf8
+
+# 4. PostgreSQL 서비스 시작
+brew services start postgresql@14
+
+# 5. 잠시 대기 후 상태 확인
+sleep 3
+brew services list
+
+# 6. PostgreSQL 접속 테스트
+psql postgres
+
+# 7. 데이터베이스 생성 (psql 프롬프트 내에서)
+CREATE DATABASE gallery_db;
+\q
+
+# 8. 생성된 데이터베이스 확인
+psql -l
+
+# 9. 프로젝트 의존성 설치
+npm install
+npm install next-auth bcryptjs @prisma/client
+npm install prisma --save-dev
+npm install --save-dev @types/bcryptjs
+npm install ts-node --save-dev
+
+# 10. Prisma 초기화 및 설정
+npx prisma init
+npx prisma generate
+npx prisma db push
+
+# 11. 관리자 계정 생성 스크립트 실행
+npm run create-admin
+
+# 12. 개발 서버 실행
+npm run dev
+
+# Prisma 상태 확인
+npx prisma format
+npx prisma generate
+npx prisma db push
+
+# 데이터베이스 연결 테스트
+npx prisma studio
+
+# PostgreSQL 서비스 상태 확인
+brew services list | grep postgresql
+
+# 필요한 경우 재시작
+brew services restart postgresql@14
+
+# Prisma 스키마 변경사항 적용
+npx prisma generate
+npx prisma db push
+
+# 데이터베이스 확인
+npx prisma studio
+
+# 1. PostgreSQL 접속
+psql postgres
+
+# 2. 데이터베이스에 대한 권한 부여 (psql 프롬프트 내에서)
+CREATE USER postgres WITH PASSWORD 'password' SUPERUSER;
+GRANT ALL PRIVILEGES ON DATABASE gallery_db TO postgres;
+ALTER DATABASE gallery_db OWNER TO postgres;
+\q
+
+# 3. .env 파일의 DATABASE_URL 수정
+# DATABASE_URL="postgresql://postgres:password@localhost:5432/gallery_db"
+
+# 4. 데이터베이스 마이그레이션 다시 실행
+npx prisma generate
+npx prisma db push
+
+# 5. Prisma Studio 실행
+npx prisma studio
